@@ -8,15 +8,17 @@ class NewsApi {
   NewsApi(this._dio);
 
   Future<List<CategoryData>> getCategories() async {
-    final response = await _dio.get("api.php?action=categories");
-    print("response: $response");
-    print("response: ${response.data}");
+    final response =
+        await _dio.get("api.php", queryParameters: {"action": "categories"});
     return categoryDataFromMap(response.data as String);
   }
 
-  Future<List<NewsData>> getPost(int categoryId) async {
-    final respose = await _dio.get(
-        "api.php?action=posts&first_update=1613122152&last_update=0&category=$categoryId");
-    return newsDataFromMap(respose.data as String);
+  Future<List<NewsData>> getPost(int categoryId, int time) async {
+    final response = await _dio.get("api.php", queryParameters: {
+      "action": "post",
+      "first_update": time,
+      "category": categoryId
+    });
+    return newsDataFromMap(response.data as String);
   }
 }
