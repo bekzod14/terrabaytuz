@@ -8,39 +8,21 @@ import 'package:terrabayt_uz/data/models/news_data.dart';
 import 'package:terrabayt_uz/data/models/status.dart';
 import 'package:terrabayt_uz/di/di_module.dart';
 import 'package:terrabayt_uz/resources/colors.dart';
+import 'package:terrabayt_uz/utils/int_extensions.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 1,
-          title: const Text(
-            "Terrabayt.uz",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-          ),
-          centerTitle: true),
-      body: const CategoryBody(),
-    );
-  }
+  State<HomePage> createState() => _HomePageState();
 }
 
-class CategoryBody extends StatefulWidget {
-  const CategoryBody({Key? key}) : super(key: key);
-
-  @override
-  State<CategoryBody> createState() => _CategoryBodyState();
-}
-
-class _CategoryBodyState extends State<CategoryBody> {
+class _HomePageState extends State<HomePage> {
   final source = di.get<NewsApi>();
-  Status _status = Status.initial;
+
   final _categories = <CategoryData>[];
   var _selectedCategory = -1;
+  Status _status = Status.initial;
   final _controller = PageController(
     initialPage: 0,
   );
@@ -56,6 +38,7 @@ class _CategoryBodyState extends State<CategoryBody> {
     setState(() {});
     try {
       final data = await source.getCategories();
+      data.removeWhere((element) => element.id == 2);
       _categories.clear();
       _categories.addAll(data);
       if (data.isNotEmpty) _selectedCategory = 0;
@@ -69,77 +52,107 @@ class _CategoryBodyState extends State<CategoryBody> {
 
   @override
   Widget build(BuildContext context) {
-    if (_status == Status.loading) {
-      print("Loading");
-      return const Center(
-          child: CircularProgressIndicator(color: AppColors.primary));
-    }
-    if (_status == Status.success) {
-      print("Success");
-      return Container(
-          padding: const EdgeInsets.only(top: 10),
-          child: Column(children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: SizedBox(
-                height: 40,
-                width: double.infinity,
-                child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: _categories.length,
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () => selectCategory(index),
-                        child: Container(
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          margin: const EdgeInsets.symmetric(horizontal: 5),
-                          decoration: BoxDecoration(
-                              color: _selectedCategory == index
-                                  ? AppColors.primary
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                  width: 1,
-                                  color: _selectedCategory == index
-                                      ? Colors.redAccent
-                                      : Colors.grey)),
-                          child: Text(
-                            _categories[index].name,
-                            style: TextStyle(
-                                fontSize: 14,
-                                color: _selectedCategory == index
-                                    ? Colors.white
-                                    : Colors.black),
-                          ),
-                        ),
-                      );
-                    }),
-              ),
-            ),
-            Expanded(
-                child: Container(
-              child: PageView.builder(
-                  controller: _controller,
-                  itemBuilder: (context, position) {
-                    return NewsBody(_categories[_selectedCategory]);
-                  }),
-            ))
-          ]));
-    }
-    if (_status == Status.fail) {
-      print("Fail");
-    }
-    print("Initinal");
-    return Container();
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 1,
+          title: const Text(
+            "Terrabayt.uz",
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
+          centerTitle: true),
+      body: Column(
+        children: [
+          CategoryBody(_categories, _selectedCategory,
+              (index) => {selectCategory(index)}),
+          Expanded(
+              child: _selectedCategory != -1
+                  ? PageView.builder(
+                      // physics: const NeverScrollableScrollPhysics(),
+                      onPageChanged: (index) => {selectCategory(index)},
+                      controller: _controller,
+                      itemBuilder: (context, position) {
+                        return NewsBody(_categories[_selectedCategory]);
+                      })
+                  : Container())
+        ],
+      ),
+    );
   }
 
-  void selectCategory(int index) {
+  selectCategory(int index) {
     setState(() {
       _selectedCategory = index;
       _controller.jumpToPage(index);
     });
+  }
+}
+
+class Temp extends StatelessWidget {
+  const Temp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+class CategoryBody extends StatelessWidget {
+  final List<CategoryData> _categories;
+  final _selectedCategory;
+
+  Function(int) onCategorySelected;
+
+  CategoryBody(
+      this._categories, this._selectedCategory, this.onCategorySelected,
+      {Key? key})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(top: 10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: SizedBox(
+          height: 40,
+          width: double.infinity,
+          child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 11),
+              itemCount: _categories.length,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () => onCategorySelected(index),
+                  child: Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    margin: const EdgeInsets.symmetric(horizontal: 5),
+                    decoration: BoxDecoration(
+                        color: _selectedCategory == index
+                            ? AppColors.primary
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            width: 1,
+                            color: _selectedCategory == index
+                                ? Colors.redAccent
+                                : Colors.grey)),
+                    child: Text(
+                      _categories[index].name,
+                      style: TextStyle(
+                          fontSize: 14,
+                          color: _selectedCategory == index
+                              ? Colors.white
+                              : Colors.black),
+                    ),
+                  ),
+                );
+              }),
+        ),
+      ),
+    );
   }
 }
 
@@ -194,17 +207,60 @@ class _NewsBodyState extends State<NewsBody> {
 
   @override
   Widget build(BuildContext context) {
-    print("Build News cat id: ${widget.category.id}");
-
     return PagedListView(
       pagingController: _pagingController,
       builderDelegate: PagedChildBuilderDelegate<NewsData>(
-        itemBuilder: (context, item, index) => ClipRRect(
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 4),
-            child: Stack(
-              children: [CachedNetworkImage(imageUrl: item.image)],
+        itemBuilder: (context, item, index) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.all(Radius.circular(12)),
+            child: Container(
+              height: 200,
+              width: double.infinity,
+              child: Stack(
+                children: [
+                  // Container(color: Colors.white,),
+                  CachedNetworkImage(
+                      imageUrl: item.image,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover),
+                  Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                          stops: <double>[0, 0.4, 0.6, 1],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: <Color>[
+                            Colors.black,
+                            Colors.transparent,
+                            Colors.transparent,
+                            Colors.black
+                          ]),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 16),
+                    child: Column(
+                      children: [
+                        Text(item.title,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal)),
+                        Expanded(child: Container()),
+                        Container(
+                          alignment: Alignment.centerRight,
+                          child: Text(item.updatedAt.toWeekDateMonthYear(),
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.normal)),
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),
