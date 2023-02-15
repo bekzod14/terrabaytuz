@@ -20,44 +20,64 @@ class _FilterDialogState extends State<FilterDialog> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 400,
       decoration: const BoxDecoration(
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(12), topRight: Radius.circular(12)),
           color: Colors.white),
       child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Text(
-                  "Saralash",
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => {print("Reset")},
-                  icon: const Icon(Icons.delete_outline),
-                  label: const Text(
-                    "O'chirish",
-                    style: TextStyle(color: Colors.white),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Text(
+                    "Saralash",
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24),
                   ),
-                  style: ButtonStyle(
-                      backgroundColor:
-                          MaterialStateProperty.all(AppColors.primary)),
-                )
-              ],
-            ),
-            const Text("Bo'yicha saralash"),
-            Container(),
-            MaterialButton(
-                onPressed: () => {widget.onSaved(_selectedCategory)},
-                child: const Text(
-                  "Saqlash",
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold),
-                ))
-          ],
+                  Expanded(child: Container()),
+                  ElevatedButton.icon(
+                    onPressed: () => {print("Reset")},
+                    icon: const Icon(Icons.delete_outline),
+                    label: const Text(
+                      "O'chirish",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all(AppColors.primary)),
+                  )
+                ],
+              ),
+              const Text("Bo'yicha saralash"),
+              Expanded(child: Container()),
+              Container(
+                alignment: Alignment.center,
+                width: double.infinity,
+                height: 50,
+                decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                        colors: [
+                          AppColors.primary,
+                          AppColors.redGradientEnd,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        tileMode: TileMode.clamp),
+                    borderRadius: BorderRadius.all(Radius.circular(25))),
+                child: const Text("Saqlash",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold)),
+              )
+            ],
+          ),
         ),
       ),
     );

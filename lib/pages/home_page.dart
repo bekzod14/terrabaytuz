@@ -7,6 +7,7 @@ import 'package:terrabayt_uz/data/models/category_data.dart';
 import 'package:terrabayt_uz/data/models/news_data.dart';
 import 'package:terrabayt_uz/data/models/status.dart';
 import 'package:terrabayt_uz/di/di_module.dart';
+import 'package:terrabayt_uz/pages/filter_dialog.dart';
 import 'package:terrabayt_uz/resources/colors.dart';
 import 'package:terrabayt_uz/utils/int_extensions.dart';
 
@@ -66,6 +67,30 @@ class _HomePageState extends State<HomePage> {
         children: [
           CategoryBody(_categories, _selectedCategory,
               (index) => {selectCategory(index)}),
+          Row(
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(left: 16),
+                child: Text("Yangiliklar",
+                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18)),
+              ),
+              Expanded(child: Container()),
+              ElevatedButton(
+                  onPressed: () {
+                    showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return FilterDialog(
+                              (id) => (null), _categories[_selectedCategory]);
+                        });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    backgroundColor: AppColors.primary, // <-- Button color
+                  ),
+                  child: Image.asset("assets/icons/filter.png"))
+            ],
+          ),
           Expanded(
               child: _selectedCategory != -1
                   ? PageView.builder(
@@ -240,7 +265,8 @@ class _NewsBodyState extends State<NewsBody> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0, vertical: 16),
                     child: Column(
                       children: [
                         Text(item.title,
