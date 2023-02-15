@@ -1,10 +1,17 @@
 import 'package:flutter/widgets.dart';
+class InfoPage extends StatefulWidget {
 
-class InfoPage extends StatelessWidget {
+
   const InfoPage({Key? key}) : super(key: key);
 
+  @override
+  State<InfoPage> createState() => _InfoPageState();
+}
+
+class _InfoPageState extends State<InfoPage> {
   @override
   Widget build(BuildContext context) {
     return const Placeholder();
   }
 }
+
