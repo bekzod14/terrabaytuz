@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:terrabayt_uz/pages/home_page.dart';
 
 void main() {
-  runApp(const MaterialApp());
+  runApp(const MaterialApp(
+    home: HomePage(),
+  ));
 }
