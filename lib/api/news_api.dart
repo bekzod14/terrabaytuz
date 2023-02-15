@@ -10,15 +10,22 @@ class NewsApi {
   Future<List<CategoryData>> getCategories() async {
     final response =
         await _dio.get("api.php", queryParameters: {"action": "categories"});
-    return categoryDataFromMap(response.data as String);
+    print("Code ${response.statusCode}");
+    return (response.data as List)
+        .map((e) => CategoryData.fromJson(e))
+        .toList();
   }
 
   Future<List<NewsData>> getPost(int categoryId, int time) async {
+    print("Cat: $categoryId time: $time");
     final response = await _dio.get("api.php", queryParameters: {
-      "action": "post",
+      "action": "posts",
       "first_update": time,
-      "category": categoryId
+      "category": categoryId,
+      "limit": 15
     });
-    return newsDataFromMap(response.data as String);
+    print("News Code ${response.statusCode}");
+    print("News response ${response.data}");
+    return (response.data as List).map((e) => NewsData.fromJson(e)).toList();
   }
 }

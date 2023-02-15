@@ -1,14 +1,12 @@
 // To parse this JSON data, do
 //
-//     final categoryData = categoryDataFromMap(jsonString);
+//     final categoryData = categoryDataFromJson(jsonString);
 
 import 'dart:convert';
 
-List<CategoryData> categoryDataFromMap(String str) => List<CategoryData>.from(
-    json.decode(str).map((x) => CategoryData.fromMap(x)));
+CategoryData categoryDataFromJson(String str) => CategoryData.fromJson(json.decode(str));
 
-String categoryDataToMap(List<CategoryData> data) =>
-    json.encode(List<dynamic>.from(data.map((x) => x.toMap())));
+String categoryDataToJson(CategoryData data) => json.encode(data.toJson());
 
 class CategoryData {
   CategoryData({
@@ -23,22 +21,17 @@ class CategoryData {
   String slug;
   List<CategoryData>? child;
 
-  factory CategoryData.fromMap(Map<String, dynamic> json) => CategoryData(
-        id: json["id"],
-        name: json["name"],
-        slug: json["slug"],
-        child: json["child"] == null
-            ? []
-            : List<CategoryData>.from(
-                json["child"]!.map((x) => CategoryData.fromMap(x))),
-      );
+  factory CategoryData.fromJson(Map<String, dynamic> json) => CategoryData(
+    id: json["id"],
+    name: json["name"],
+    slug: json["slug"],
+    child: json["child"] == null ? [] : List<CategoryData>.from(json["child"]!.map((x) => CategoryData.fromJson(x))),
+  );
 
-  Map<String, dynamic> toMap() => {
-        "id": id,
-        "name": name,
-        "slug": slug,
-        "child": child == null
-            ? []
-            : List<dynamic>.from(child!.map((x) => x.toMap())),
-      };
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "slug": slug,
+    "child": child == null ? [] : List<dynamic>.from(child!.map((x) => x.toJson())),
+  };
 }
