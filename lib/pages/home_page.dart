@@ -1,7 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:terrabayt_uz/api/news_api.dart';
+import 'package:terrabayt_uz/app/app_colors.dart';
 import 'package:terrabayt_uz/data/models/category_data.dart';
 import 'package:terrabayt_uz/di/di_module.dart';
+import 'package:terrabayt_uz/pages/widgets/search.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -36,6 +39,15 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: showAppBar()
+    );
+  }
+
+  showAppBar() {
+    return AppBar(
+      backgroundColor: Colors.white,
+      title: SearchWidget(),
+    );
   }
 }
