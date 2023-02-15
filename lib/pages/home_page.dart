@@ -3,7 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:terrabayt_uz/api/news_api.dart';
 import 'package:terrabayt_uz/app/app_colors.dart';
 import 'package:terrabayt_uz/data/models/category_data.dart';
+import 'package:terrabayt_uz/data/models/news_data.dart';
 import 'package:terrabayt_uz/di/di_module.dart';
+import 'package:terrabayt_uz/pages/widgets/item_news.dart';
 import 'package:terrabayt_uz/pages/widgets/search.dart';
 
 class HomePage extends StatefulWidget {
@@ -40,7 +42,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: showAppBar()
+      body: showBody(),
     );
   }
 
@@ -48,6 +50,36 @@ class _HomePageState extends State<HomePage> {
     return AppBar(
       backgroundColor: Colors.white,
       title: SearchWidget(),
+    );
+  }
+
+  showBody() {
+    return SizedBox(
+      width: double.infinity,
+      height: double.infinity,
+      child: ListView.builder(
+        itemCount: 10,
+        scrollDirection: Axis.vertical,
+        itemBuilder: (_, index) {
+          return ItemNews(
+              categoryId: 1,
+              newsData: NewsData(
+                  id: 1,
+                  title: "Salom",
+                  excerpt: "salom",
+                  content: "Assalamu alaykum",
+                  publishedAt: 1,
+                  updatedAt: 1,
+                  postId: "",
+                  postModified: "",
+                  categoryId: 1,
+                  categoryName: CategoryName.NARXLAR,
+                  image: "sd",
+                  url: "",
+                  priority: "",
+                  order: ""));
+        },
+      ),
     );
   }
 }
