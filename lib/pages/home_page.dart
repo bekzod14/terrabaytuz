@@ -8,6 +8,7 @@ import 'package:terrabayt_uz/data/models/news_data.dart';
 import 'package:terrabayt_uz/data/models/status.dart';
 import 'package:terrabayt_uz/di/di_module.dart';
 import 'package:terrabayt_uz/pages/filter_dialog.dart';
+import 'package:terrabayt_uz/pages/info_page.dart';
 import 'package:terrabayt_uz/resources/colors.dart';
 import 'package:terrabayt_uz/utils/int_extensions.dart';
 
@@ -20,10 +21,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final source = di.get<NewsApi>();
-
+  var _status = Status.initial;
   final _categories = <CategoryData>[];
   var _selectedCategory = -1;
-  Status _status = Status.initial;
+  var _selectedSubCategory = -1;
   final _controller = PageController(
     initialPage: 0,
   );
@@ -67,38 +68,53 @@ class _HomePageState extends State<HomePage> {
         children: [
           CategoryBody(_categories, _selectedCategory,
               (index) => {selectCategory(index)}),
-          Row(
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(left: 16),
-                child: Text("Yangiliklar",
-                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18)),
-              ),
-              Expanded(child: Container()),
-              ElevatedButton(
-                  onPressed: () {
-                    showModalBottomSheet(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return FilterDialog(
-                              (id) => (null), _categories[_selectedCategory]);
-                        });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
-                    backgroundColor: AppColors.primary, // <-- Button color
-                  ),
-                  child: Image.asset("assets/icons/filter.png"))
-            ],
+          SizedBox(
+            height: 60,
+            width: double.infinity,
+            child: Row(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(left: 16),
+                  child: Text("Yangiliklar",
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                ),
+                Expanded(child: Container()),
+                if (_selectedCategory != -1 &&
+                    _categories[_selectedCategory].child != null &&
+                    _categories[_selectedCategory].child!.isNotEmpty)
+                  ElevatedButton(
+                      onPressed: () {
+                        showModalBottomSheet(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return FilterDialog(
+                                  _selectedSubCategory,
+                                  (index) => selectSubCategory(index),
+                                  _categories[_selectedCategory]);
+                            });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: const CircleBorder(),
+                        backgroundColor: AppColors.primary, // <-- Button color
+                      ),
+                      child: Image.asset("assets/icons/filter.png"))
+              ],
+            ),
           ),
           Expanded(
               child: _selectedCategory != -1
                   ? PageView.builder(
-                      // physics: const NeverScrollableScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       onPageChanged: (index) => {selectCategory(index)},
                       controller: _controller,
                       itemBuilder: (context, position) {
-                        return NewsBody(_categories[_selectedCategory]);
+                        var category = (_selectedSubCategory == -1)
+                            ? _categories[_selectedCategory]
+                            : _categories[_selectedCategory]
+                                .child![_selectedSubCategory];
+                        print(category.name);
+                        return NewsBody(category);
                       })
                   : Container())
         ],
@@ -106,20 +122,20 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  selectSubCategory(int index) {
+    setState(() {
+      _selectedSubCategory = index;
+    });
+  }
+
   selectCategory(int index) {
     setState(() {
+      if (_selectedCategory != index) {
+        _selectedSubCategory = -1;
+      }
       _selectedCategory = index;
       _controller.jumpToPage(index);
     });
-  }
-}
-
-class Temp extends StatelessWidget {
-  const Temp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
   }
 }
 
@@ -184,7 +200,9 @@ class CategoryBody extends StatelessWidget {
 class NewsBody extends StatefulWidget {
   final CategoryData category;
 
-  const NewsBody(this.category, {Key? key}) : super(key: key);
+  NewsBody(this.category, {Key? key}) : super(key: key) {
+    print("NewsBody");
+  }
 
   @override
   State<NewsBody> createState() => _NewsBodyState();
@@ -235,57 +253,69 @@ class _NewsBodyState extends State<NewsBody> {
     return PagedListView(
       pagingController: _pagingController,
       builderDelegate: PagedChildBuilderDelegate<NewsData>(
+        firstPageProgressIndicatorBuilder: (context) => const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+        newPageProgressIndicatorBuilder: (context) => const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
         itemBuilder: (context, item, index) => Padding(
           padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.all(Radius.circular(12)),
-            child: Container(
-              height: 200,
-              width: double.infinity,
-              child: Stack(
-                children: [
-                  // Container(color: Colors.white,),
-                  CachedNetworkImage(
-                      imageUrl: item.image,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover),
-                  Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                          stops: <double>[0, 0.4, 0.6, 1],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: <Color>[
-                            Colors.black,
-                            Colors.transparent,
-                            Colors.transparent,
-                            Colors.black
-                          ]),
+          child: GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => InfoPage(item)),
+            ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(12)),
+              child: SizedBox(
+                height: 200,
+                width: double.infinity,
+                child: Stack(
+                  children: [
+                    // Container(color: Colors.white,),
+                    CachedNetworkImage(
+                        imageUrl: item.image,
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover),
+                    Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                            stops: <double>[0, 0.4, 0.6, 1],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: <Color>[
+                              Colors.black,
+                              Colors.transparent,
+                              Colors.transparent,
+                              Colors.black
+                            ]),
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12.0, vertical: 16),
-                    child: Column(
-                      children: [
-                        Text(item.title,
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.normal)),
-                        Expanded(child: Container()),
-                        Container(
-                          alignment: Alignment.centerRight,
-                          child: Text(item.updatedAt.toWeekDateMonthYear(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0, vertical: 16),
+                      child: Column(
+                        children: [
+                          Text(item.title,
                               style: const TextStyle(
                                   color: Colors.white,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.normal)),
-                        )
-                      ],
-                    ),
-                  )
-                ],
+                          Expanded(child: Container()),
+                          Container(
+                            alignment: Alignment.centerRight,
+                            child: Text(item.updatedAt.toWeekDateMonthYear(),
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.normal)),
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
           ),

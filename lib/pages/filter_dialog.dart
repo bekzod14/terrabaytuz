@@ -1,13 +1,16 @@
+import 'package:chips_choice/chips_choice.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:terrabayt_uz/data/models/category_data.dart';
 import 'package:terrabayt_uz/resources/colors.dart';
 
 class FilterDialog extends StatefulWidget {
-  final Function(int? id) onSaved;
+  final int firstSelected;
+  final Function(int index) onSaved;
   final CategoryData categogry;
 
-  const FilterDialog(this.onSaved, this.categogry, {Key? key})
+  const FilterDialog(this.firstSelected, this.onSaved, this.categogry,
+      {Key? key})
       : super(key: key);
 
   @override
@@ -15,7 +18,23 @@ class FilterDialog extends StatefulWidget {
 }
 
 class _FilterDialogState extends State<FilterDialog> {
-  int? _selectedCategory = null;
+  int _selectedCategoryIndex = -1;
+
+  @override
+  void initState() {
+    _selectedCategoryIndex = widget.firstSelected;
+    super.initState();
+  }
+
+  void removeSelected() {
+    _selectedCategoryIndex = -1;
+    setState(() {});
+  }
+
+  void setSelected(int index) {
+    _selectedCategoryIndex = index;
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +51,7 @@ class _FilterDialogState extends State<FilterDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Text(
                     "Saralash",
@@ -41,45 +61,81 @@ class _FilterDialogState extends State<FilterDialog> {
                         fontSize: 24),
                   ),
                   Expanded(child: Container()),
-                  ElevatedButton.icon(
-                    onPressed: () => {print("Reset")},
-                    icon: const Icon(Icons.delete_outline),
-                    label: const Text(
-                      "O'chirish",
-                      style: TextStyle(color: Colors.white),
+                  GestureDetector(
+                    onTap: () => removeSelected(),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 5),
+                      height: 40,
+                      decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(15))),
+                      child: const Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [Icon(Icons.delete), Text("O'chirish")],
+                      ),
                     ),
-                    style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all(AppColors.primary)),
                   )
                 ],
               ),
-              const Text("Bo'yicha saralash"),
+              const Padding(
+                padding: EdgeInsets.only(top: 15.0),
+                child: Text(
+                  "Bo'yicha saralash",
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+              ChipsChoice.single(
+                value: _selectedCategoryIndex,
+                onChanged: (val) => setSelected(val),
+                choiceItems: C2Choice.listFrom<int, CategoryData>(
+                    source: widget.categogry.child!,
+                    value: (i, v) => i,
+                    label: (i, v) => v.name),
+                choiceStyle: C2ChipStyle.outlined(
+                    color: Colors.grey,
+                    foregroundStyle: const TextStyle(color: Colors.black),
+                    borderWidth: 1,
+                    borderRadius: const BorderRadius.all(Radius.circular(20)),
+                    selectedStyle: C2ChipStyle.filled(
+                        color: AppColors.primary,
+                        foregroundStyle: const TextStyle(color: Colors.white))),
+                wrapped: true,
+              ),
               Expanded(child: Container()),
-              Container(
-                alignment: Alignment.center,
-                width: double.infinity,
-                height: 50,
-                decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                        colors: [
-                          AppColors.primary,
-                          AppColors.redGradientEnd,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        tileMode: TileMode.clamp),
-                    borderRadius: BorderRadius.all(Radius.circular(25))),
-                child: const Text("Saqlash",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold)),
+              GestureDetector(
+                onTap: () => {saveSelected()},
+                child: Container(
+                  alignment: Alignment.center,
+                  width: double.infinity,
+                  height: 50,
+                  decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                          colors: [
+                            AppColors.primary,
+                            AppColors.redGradientEnd,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          tileMode: TileMode.clamp),
+                      borderRadius: BorderRadius.all(Radius.circular(25))),
+                  child: const Text("Saqlash",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold)),
+                ),
               )
             ],
           ),
         ),
       ),
     );
+  }
+
+  saveSelected() {
+    widget.onSaved.call(_selectedCategoryIndex);
+    Navigator.pop(context);
   }
 }

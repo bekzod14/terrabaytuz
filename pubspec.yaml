@@ -20,6 +20,8 @@ dependencies:
   chips_choice: ^3.0.0
   infinite_scroll_pagination: ^3.2.0
   intl: ^0.17.0
+  flutter_widget_from_html: ^0.10.0
+  webview_flutter: ^4.0.6
 
 dev_dependencies:
   flutter_test:
