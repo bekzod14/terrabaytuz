@@ -1,6 +1,6 @@
 # terrabayt_uz
 
-A new Flutter project.
+Mobile application for Terrabayt.uz in Flutter.
 
 ## Getting Started
 
