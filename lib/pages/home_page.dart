@@ -114,7 +114,10 @@ class _HomePageState extends State<HomePage> {
                             : _categories[_selectedCategory]
                                 .child![_selectedSubCategory];
                         print(category.name);
-                        return NewsBody(category);
+                        return NewsBody(
+                          category,
+                          key: ObjectKey(category),
+                        );
                       })
                   : Container())
         ],
